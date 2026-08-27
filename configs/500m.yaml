@@ -1,0 +1,62 @@
+# ==============================================================================
+# Indian Legal Reasoning Model (Omilos Own AI) - 500M Target Architecture
+# Total Trainable Parameters: ~481.6M (Tied Embeddings)
+# ==============================================================================
+
+project:
+  name: "indian-legal-reasoning-500m"
+  seed: 42
+  output_dir: "runs/500m"
+  checkpoint_dir: "checkpoints/500m"
+  log_dir: "logs/500m"
+
+hardware:
+  device: "auto"
+  mixed_precision: "auto"
+
+tokenizer:
+  vocab_size: 32000
+  model_type: "bpe"
+  min_frequency: 2
+  special_tokens:
+    pad: "<pad>"
+    unk: "<unk>"
+    bos: "<s>"
+    eos: "</s>"
+
+model:
+  vocab_size: 32000
+  hidden_size: 1152
+  num_layers: 24
+  num_attention_heads: 18
+  num_kv_heads: 6
+  intermediate_size: 4352
+  max_seq_len: 2048
+  rope_theta: 10000.0
+  rms_norm_eps: 1.0e-6
+  tie_word_embeddings: true
+
+training:
+  batch_size: 4
+  gradient_accumulation_steps: 8
+  learning_rate: 0.0003
+  min_learning_rate: 0.00003
+  weight_decay: 0.1
+  beta1: 0.9
+  beta2: 0.95
+  eps: 1.0e-8
+  warmup_steps: 1000
+  max_steps: 50000
+  max_grad_norm: 1.0
+  mixed_precision: "auto"
+  gradient_checkpointing: true
+
+logging:
+  level: "INFO"
+  log_every_steps: 10
+  eval_every_steps: 250
+  save_every_steps: 1000
+
+checkpoint:
+  output_dir: "checkpoints/500m"
+  keep_last_n: 3

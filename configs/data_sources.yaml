@@ -1,0 +1,115 @@
+version: '1.0'
+description: Indian Legal Reasoning Model Data Ingestion Policy
+sources:
+- id: OmilosAISolutions/nyayamitra-training-data
+  visibility: private
+  category: CONSTITUTIONAL
+  status: INCLUDE
+  enabled: true
+  estimated_tokens: 120000000
+  reason: Authoritative proprietary training corpus verified for Indian legal reasoning.
+- id: OmilosAISolutions/vakeels-legal-training-data
+  visibility: private
+  category: LEGISLATION
+  status: INCLUDE
+  enabled: true
+  estimated_tokens: 75000000
+  reason: Authoritative proprietary training corpus verified for Indian legal reasoning.
+- id: OmilosAISolutions/highcourt-2023-full-metadata
+  visibility: private
+  category: CASE_LAW
+  status: INCLUDE
+  enabled: true
+  estimated_tokens: 45000000
+  reason: Authoritative proprietary training corpus verified for Indian legal reasoning.
+- id: vaquill/open-india-law
+  visibility: public
+  category: LEGISLATION
+  status: INCLUDE
+  enabled: true
+  estimated_tokens: 50000000
+  reason: High-quality primary Indian legal source meeting pretraining authority standards.
+- id: LH2-data-labs/indian-legal-records
+  visibility: public
+  category: CASE_LAW
+  status: INCLUDE
+  enabled: true
+  estimated_tokens: 65000000
+  reason: High-quality primary Indian legal source meeting pretraining authority standards.
+- id: KanoonGPT/indian-case-laws
+  visibility: public
+  category: CASE_LAW
+  status: INCLUDE
+  enabled: true
+  estimated_tokens: 95000000
+  reason: High-quality primary Indian legal source meeting pretraining authority standards.
+- id: Sumitedu/indian-case-laws
+  visibility: public
+  category: CASE_LAW
+  status: INCLUDE
+  enabled: true
+  estimated_tokens: 28000000
+  reason: High-quality primary Indian legal source meeting pretraining authority standards.
+- id: debkanchan/supreme-court-of-india-judgements
+  visibility: public
+  category: CASE_LAW
+  status: INCLUDE
+  enabled: true
+  estimated_tokens: 80000000
+  reason: High-quality primary Indian legal source meeting pretraining authority standards.
+- id: 123Divyansh/Constitution.-of-India-TXT_File
+  visibility: public
+  category: CONSTITUTIONAL
+  status: INCLUDE
+  enabled: true
+  estimated_tokens: 450000
+  reason: High-quality primary Indian legal source meeting pretraining authority standards.
+- id: SnehaDeshmukh/IndianBailJudgments-1200
+  visibility: public
+  category: LEGISLATION
+  status: INCLUDE
+  enabled: true
+  estimated_tokens: 3500000
+  reason: High-quality primary Indian legal source meeting pretraining authority standards.
+- id: navaneeth005/BNS_definitions
+  visibility: public
+  category: LEGISLATION
+  status: INCLUDE
+  enabled: true
+  estimated_tokens: 600000
+  reason: High-quality primary Indian legal source meeting pretraining authority standards.
+- id: navaneeth005/BNS_detailed
+  visibility: public
+  category: LEGISLATION
+  status: INCLUDE
+  enabled: true
+  estimated_tokens: 2200000
+  reason: High-quality primary Indian legal source meeting pretraining authority standards.
+- id: navaneeth005/special_acts
+  visibility: public
+  category: LEGISLATION
+  status: INCLUDE
+  enabled: true
+  estimated_tokens: 3000000
+  reason: High-quality primary Indian legal source meeting pretraining authority standards.
+- id: Shreyasrao/Indian-law-supreme-court-judgements-2016
+  visibility: public
+  category: CASE_LAW
+  status: INCLUDE
+  enabled: true
+  estimated_tokens: 4200000
+  reason: High-quality primary Indian legal source meeting pretraining authority standards.
+- id: vihaannnn/Chunked-Indian-Supreme-Court-Judgements
+  visibility: public
+  category: CASE_LAW
+  status: EXCLUDE
+  enabled: false
+  estimated_tokens: 40000000
+  reason: 'Duplicate or chunked variant of primary corpus: debkanchan/supreme-court-of-india-judgements'
+- id: vihaannnn/Indian-Supreme-Court-Judgements-Chunked
+  visibility: public
+  category: CASE_LAW
+  status: EXCLUDE
+  enabled: false
+  estimated_tokens: 38000000
+  reason: 'Duplicate or chunked variant of primary corpus: debkanchan/supreme-court-of-india-judgements'

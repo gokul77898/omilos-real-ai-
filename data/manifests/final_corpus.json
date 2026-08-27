@@ -1,0 +1,366 @@
+{
+  "version": "1.0.0",
+  "timestamp": "2026-08-27T19:20:41Z",
+  "tokenizer": "artifacts/tokenizer/tokenizer.json",
+  "sequence_length": 2048,
+  "raw_documents": 170,
+  "unique_documents": 39,
+  "exact_duplicates_removed": 129,
+  "near_duplicates_removed": 2,
+  "total_unique_tokens": 17136,
+  "target_tokens": 10000000000,
+  "token_deficit": 9999982864,
+  "train_tokens": 14336,
+  "validation_tokens": 0,
+  "train_shards": 1,
+  "validation_shards": 0,
+  "court_counts": {
+    "Supreme Court": {
+      "docs": 3,
+      "tokens": 2274
+    },
+    "High Courts": {
+      "docs": 25,
+      "tokens": 12114
+    },
+    "District Courts": {
+      "docs": 0,
+      "tokens": 0
+    },
+    "Tribunals": {
+      "docs": 0,
+      "tokens": 0
+    },
+    "Legislation / Constitution": {
+      "docs": 11,
+      "tokens": 2748
+    }
+  },
+  "high_court_coverage": {
+    "Allahabad": {
+      "court": "Allahabad",
+      "document_count": 1,
+      "usable_document_count": 1,
+      "estimated_tokens": 550,
+      "languages": [
+        "en",
+        "hi"
+      ],
+      "duplicate_count": 0,
+      "status": "ACTIVE_SOURCE"
+    },
+    "Andhra Pradesh": {
+      "court": "Andhra Pradesh",
+      "document_count": 1,
+      "usable_document_count": 1,
+      "estimated_tokens": 508,
+      "languages": [
+        "en",
+        "hi"
+      ],
+      "duplicate_count": 0,
+      "status": "ACTIVE_SOURCE"
+    },
+    "Bombay": {
+      "court": "Bombay",
+      "document_count": 1,
+      "usable_document_count": 1,
+      "estimated_tokens": 528,
+      "languages": [
+        "en",
+        "hi"
+      ],
+      "duplicate_count": 0,
+      "status": "ACTIVE_SOURCE"
+    },
+    "Calcutta": {
+      "court": "Calcutta",
+      "document_count": 1,
+      "usable_document_count": 1,
+      "estimated_tokens": 482,
+      "languages": [
+        "en",
+        "hi"
+      ],
+      "duplicate_count": 0,
+      "status": "ACTIVE_SOURCE"
+    },
+    "Chhattisgarh": {
+      "court": "Chhattisgarh",
+      "document_count": 1,
+      "usable_document_count": 1,
+      "estimated_tokens": 446,
+      "languages": [
+        "en",
+        "hi"
+      ],
+      "duplicate_count": 0,
+      "status": "ACTIVE_SOURCE"
+    },
+    "Delhi": {
+      "court": "Delhi",
+      "document_count": 1,
+      "usable_document_count": 1,
+      "estimated_tokens": 520,
+      "languages": [
+        "en",
+        "hi"
+      ],
+      "duplicate_count": 0,
+      "status": "ACTIVE_SOURCE"
+    },
+    "Gauhati": {
+      "court": "Gauhati",
+      "document_count": 1,
+      "usable_document_count": 1,
+      "estimated_tokens": 502,
+      "languages": [
+        "en",
+        "hi"
+      ],
+      "duplicate_count": 0,
+      "status": "ACTIVE_SOURCE"
+    },
+    "Gujarat": {
+      "court": "Gujarat",
+      "document_count": 1,
+      "usable_document_count": 1,
+      "estimated_tokens": 498,
+      "languages": [
+        "en",
+        "hi"
+      ],
+      "duplicate_count": 0,
+      "status": "ACTIVE_SOURCE"
+    },
+    "Himachal Pradesh": {
+      "court": "Himachal Pradesh",
+      "document_count": 1,
+      "usable_document_count": 1,
+      "estimated_tokens": 486,
+      "languages": [
+        "en",
+        "hi"
+      ],
+      "duplicate_count": 0,
+      "status": "ACTIVE_SOURCE"
+    },
+    "Jammu & Kashmir and Ladakh": {
+      "court": "Jammu & Kashmir and Ladakh",
+      "document_count": 1,
+      "usable_document_count": 1,
+      "estimated_tokens": 440,
+      "languages": [
+        "en",
+        "hi"
+      ],
+      "duplicate_count": 0,
+      "status": "ACTIVE_SOURCE"
+    },
+    "Jharkhand": {
+      "court": "Jharkhand",
+      "document_count": 1,
+      "usable_document_count": 1,
+      "estimated_tokens": 472,
+      "languages": [
+        "en",
+        "hi"
+      ],
+      "duplicate_count": 0,
+      "status": "ACTIVE_SOURCE"
+    },
+    "Karnataka": {
+      "court": "Karnataka",
+      "document_count": 1,
+      "usable_document_count": 1,
+      "estimated_tokens": 502,
+      "languages": [
+        "en",
+        "hi"
+      ],
+      "duplicate_count": 0,
+      "status": "ACTIVE_SOURCE"
+    },
+    "Kerala": {
+      "court": "Kerala",
+      "document_count": 1,
+      "usable_document_count": 1,
+      "estimated_tokens": 530,
+      "languages": [
+        "en",
+        "hi"
+      ],
+      "duplicate_count": 0,
+      "status": "ACTIVE_SOURCE"
+    },
+    "Madhya Pradesh": {
+      "court": "Madhya Pradesh",
+      "document_count": 1,
+      "usable_document_count": 1,
+      "estimated_tokens": 458,
+      "languages": [
+        "en",
+        "hi"
+      ],
+      "duplicate_count": 0,
+      "status": "ACTIVE_SOURCE"
+    },
+    "Madras": {
+      "court": "Madras",
+      "document_count": 1,
+      "usable_document_count": 1,
+      "estimated_tokens": 492,
+      "languages": [
+        "en",
+        "hi"
+      ],
+      "duplicate_count": 0,
+      "status": "ACTIVE_SOURCE"
+    },
+    "Manipur": {
+      "court": "Manipur",
+      "document_count": 1,
+      "usable_document_count": 1,
+      "estimated_tokens": 478,
+      "languages": [
+        "en",
+        "hi"
+      ],
+      "duplicate_count": 0,
+      "status": "ACTIVE_SOURCE"
+    },
+    "Meghalaya": {
+      "court": "Meghalaya",
+      "document_count": 1,
+      "usable_document_count": 1,
+      "estimated_tokens": 446,
+      "languages": [
+        "en",
+        "hi"
+      ],
+      "duplicate_count": 0,
+      "status": "ACTIVE_SOURCE"
+    },
+    "Orissa": {
+      "court": "Orissa",
+      "document_count": 1,
+      "usable_document_count": 1,
+      "estimated_tokens": 476,
+      "languages": [
+        "en",
+        "hi"
+      ],
+      "duplicate_count": 0,
+      "status": "ACTIVE_SOURCE"
+    },
+    "Patna": {
+      "court": "Patna",
+      "document_count": 1,
+      "usable_document_count": 1,
+      "estimated_tokens": 484,
+      "languages": [
+        "en",
+        "hi"
+      ],
+      "duplicate_count": 0,
+      "status": "ACTIVE_SOURCE"
+    },
+    "Punjab & Haryana": {
+      "court": "Punjab & Haryana",
+      "document_count": 1,
+      "usable_document_count": 1,
+      "estimated_tokens": 468,
+      "languages": [
+        "en",
+        "hi"
+      ],
+      "duplicate_count": 0,
+      "status": "ACTIVE_SOURCE"
+    },
+    "Rajasthan": {
+      "court": "Rajasthan",
+      "document_count": 1,
+      "usable_document_count": 1,
+      "estimated_tokens": 484,
+      "languages": [
+        "en",
+        "hi"
+      ],
+      "duplicate_count": 0,
+      "status": "ACTIVE_SOURCE"
+    },
+    "Sikkim": {
+      "court": "Sikkim",
+      "document_count": 1,
+      "usable_document_count": 1,
+      "estimated_tokens": 456,
+      "languages": [
+        "en",
+        "hi"
+      ],
+      "duplicate_count": 0,
+      "status": "ACTIVE_SOURCE"
+    },
+    "Telangana": {
+      "court": "Telangana",
+      "document_count": 1,
+      "usable_document_count": 1,
+      "estimated_tokens": 498,
+      "languages": [
+        "en",
+        "hi"
+      ],
+      "duplicate_count": 0,
+      "status": "ACTIVE_SOURCE"
+    },
+    "Tripura": {
+      "court": "Tripura",
+      "document_count": 1,
+      "usable_document_count": 1,
+      "estimated_tokens": 444,
+      "languages": [
+        "en",
+        "hi"
+      ],
+      "duplicate_count": 0,
+      "status": "ACTIVE_SOURCE"
+    },
+    "Uttarakhand": {
+      "court": "Uttarakhand",
+      "document_count": 1,
+      "usable_document_count": 1,
+      "estimated_tokens": 466,
+      "languages": [
+        "en",
+        "hi"
+      ],
+      "duplicate_count": 0,
+      "status": "ACTIVE_SOURCE"
+    }
+  },
+  "language_tokens": {
+    "English": 14388,
+    "Hindi": 384,
+    "Kannada": 230,
+    "Tamil": 284,
+    "Telugu": 224,
+    "Malayalam": 254,
+    "Bengali": 232,
+    "Marathi": 222,
+    "Gujarati": 264,
+    "Punjabi": 194,
+    "Urdu": 188,
+    "Sanskrit": 272
+  },
+  "domain_tokens": {
+    "Constitutional": 4823,
+    "Criminal": 3123,
+    "Civil": 1058,
+    "Corporate / Commercial": 498,
+    "Tax": 478,
+    "Intellectual Property": 4792,
+    "Arbitration": 0,
+    "Special Acts": 0,
+    "General": 2364
+  }
+}

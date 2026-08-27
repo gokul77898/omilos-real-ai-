@@ -1,0 +1,62 @@
+# ==============================================================================
+# Indian Legal Reasoning Model (Omilos Own AI) - Base Configuration
+# Phase 5: 500M Training Engine & Optimization Loop
+# ==============================================================================
+
+project:
+  name: "indian-legal-reasoning"
+  seed: 42
+  output_dir: "runs"
+  checkpoint_dir: "checkpoints"
+  log_dir: "logs"
+
+hardware:
+  device: "auto"              # Options: "auto", "cuda", "mps", "cpu"
+  mixed_precision: "auto"     # Options: "auto", "no", "fp16", "bf16"
+
+tokenizer:
+  vocab_size: 32000
+  model_type: "bpe"
+  min_frequency: 2
+  special_tokens:
+    pad: "<pad>"
+    unk: "<unk>"
+    bos: "<s>"
+    eos: "</s>"
+
+model:
+  vocab_size: 32000
+  hidden_size: 512
+  num_layers: 8
+  num_attention_heads: 8
+  num_kv_heads: 4
+  intermediate_size: 1408
+  max_seq_len: 2048
+  rope_theta: 10000.0
+  rms_norm_eps: 1.0e-6
+  tie_word_embeddings: true
+
+training:
+  batch_size: 4
+  gradient_accumulation_steps: 8
+  learning_rate: 0.0003
+  min_learning_rate: 0.00003
+  weight_decay: 0.1
+  beta1: 0.9
+  beta2: 0.95
+  eps: 1.0e-8
+  warmup_steps: 500
+  max_steps: 10000
+  max_grad_norm: 1.0
+  mixed_precision: "auto"
+  gradient_checkpointing: false
+
+logging:
+  level: "INFO"               # Options: "DEBUG", "INFO", "WARNING", "ERROR"
+  log_every_steps: 10
+  eval_every_steps: 100
+  save_every_steps: 500
+
+checkpoint:
+  output_dir: "checkpoints"
+  keep_last_n: 3

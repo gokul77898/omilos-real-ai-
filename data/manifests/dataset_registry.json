@@ -1,0 +1,625 @@
+{
+  "version": "1.0.0",
+  "total_datasets": 16,
+  "datasets": [
+    {
+      "dataset_id": "OmilosAISolutions/nyayamitra-training-data",
+      "visibility": "private",
+      "category": "CONSTITUTIONAL",
+      "license": "proprietary",
+      "license_status": "REVIEW_REQUIRED",
+      "provenance": "Official / Primary Legal Repository",
+      "provenance_status": "VERIFIED",
+      "recommended": true,
+      "recommendation_status": "INCLUDE",
+      "reason": "Authoritative proprietary training corpus verified for Indian legal reasoning.",
+      "languages": [
+        "en",
+        "hi",
+        "kn",
+        "ta",
+        "te",
+        "ml",
+        "mr",
+        "bn",
+        "gu",
+        "pa",
+        "ur",
+        "sa"
+      ],
+      "legal_coverage": [
+        "Supreme Court",
+        "High Courts",
+        "BNS",
+        "BNSS",
+        "BSA",
+        "Constitution",
+        "Special Acts"
+      ],
+      "text_fields": [
+        "content",
+        "text"
+      ],
+      "estimated_rows": 150000,
+      "estimated_tokens": 120000000,
+      "quality_score": 35.0,
+      "quality_breakdown": {
+        "source_authority": 5.0,
+        "legal_relevance": 5.0,
+        "text_quality": 4.5,
+        "coverage": 4.0,
+        "provenance": 5.0,
+        "license_clarity": 3.0,
+        "metadata_quality": 4.0,
+        "duplication_safety": 4.5
+      },
+      "duplicate_of": null
+    },
+    {
+      "dataset_id": "OmilosAISolutions/vakeels-legal-training-data",
+      "visibility": "private",
+      "category": "LEGISLATION",
+      "license": "proprietary",
+      "license_status": "REVIEW_REQUIRED",
+      "provenance": "Official / Primary Legal Repository",
+      "provenance_status": "VERIFIED",
+      "recommended": true,
+      "recommendation_status": "INCLUDE",
+      "reason": "Authoritative proprietary training corpus verified for Indian legal reasoning.",
+      "languages": [
+        "en",
+        "hi"
+      ],
+      "legal_coverage": [
+        "Supreme Court",
+        "High Courts",
+        "Civil & Criminal Procedure"
+      ],
+      "text_fields": [
+        "judgment_text",
+        "arguments"
+      ],
+      "estimated_rows": 85000,
+      "estimated_tokens": 75000000,
+      "quality_score": 35.0,
+      "quality_breakdown": {
+        "source_authority": 5.0,
+        "legal_relevance": 5.0,
+        "text_quality": 4.5,
+        "coverage": 4.0,
+        "provenance": 5.0,
+        "license_clarity": 3.0,
+        "metadata_quality": 4.0,
+        "duplication_safety": 4.5
+      },
+      "duplicate_of": null
+    },
+    {
+      "dataset_id": "OmilosAISolutions/highcourt-2023-full-metadata",
+      "visibility": "private",
+      "category": "CASE_LAW",
+      "license": "proprietary",
+      "license_status": "REVIEW_REQUIRED",
+      "provenance": "Official / Primary Legal Repository",
+      "provenance_status": "VERIFIED",
+      "recommended": true,
+      "recommendation_status": "INCLUDE",
+      "reason": "Authoritative proprietary training corpus verified for Indian legal reasoning.",
+      "languages": [
+        "en",
+        "hi",
+        "ta",
+        "mr",
+        "bn"
+      ],
+      "legal_coverage": [
+        "25 Indian High Courts",
+        "Orders",
+        "Notifications"
+      ],
+      "text_fields": [
+        "order_text",
+        "summary",
+        "citations"
+      ],
+      "estimated_rows": 220000,
+      "estimated_tokens": 45000000,
+      "quality_score": 35.0,
+      "quality_breakdown": {
+        "source_authority": 5.0,
+        "legal_relevance": 5.0,
+        "text_quality": 4.5,
+        "coverage": 4.0,
+        "provenance": 5.0,
+        "license_clarity": 3.0,
+        "metadata_quality": 4.0,
+        "duplication_safety": 4.5
+      },
+      "duplicate_of": null
+    },
+    {
+      "dataset_id": "vaquill/open-india-law",
+      "visibility": "public",
+      "category": "LEGISLATION",
+      "license": "apache-2.0",
+      "license_status": "CLEAR",
+      "provenance": "Official / Primary Legal Repository",
+      "provenance_status": "VERIFIED",
+      "recommended": true,
+      "recommendation_status": "INCLUDE",
+      "reason": "High-quality primary Indian legal source meeting pretraining authority standards.",
+      "languages": [
+        "en"
+      ],
+      "legal_coverage": [
+        "Central Acts",
+        "State Acts",
+        "Supreme Court"
+      ],
+      "text_fields": [
+        "act_text",
+        "section_content"
+      ],
+      "estimated_rows": 45000,
+      "estimated_tokens": 50000000,
+      "quality_score": 37.0,
+      "quality_breakdown": {
+        "source_authority": 5.0,
+        "legal_relevance": 5.0,
+        "text_quality": 4.5,
+        "coverage": 4.0,
+        "provenance": 5.0,
+        "license_clarity": 5.0,
+        "metadata_quality": 4.0,
+        "duplication_safety": 4.5
+      },
+      "duplicate_of": null
+    },
+    {
+      "dataset_id": "LH2-data-labs/indian-legal-records",
+      "visibility": "public",
+      "category": "CASE_LAW",
+      "license": "cc-by-4.0",
+      "license_status": "CLEAR",
+      "provenance": "Community Contributed (Unverified Source)",
+      "provenance_status": "UNKNOWN",
+      "recommended": true,
+      "recommendation_status": "INCLUDE",
+      "reason": "High-quality primary Indian legal source meeting pretraining authority standards.",
+      "languages": [
+        "en"
+      ],
+      "legal_coverage": [
+        "NCLT",
+        "ITAT",
+        "CAT",
+        "High Courts"
+      ],
+      "text_fields": [
+        "record_text",
+        "tribunal_order"
+      ],
+      "estimated_rows": 60000,
+      "estimated_tokens": 65000000,
+      "quality_score": 31.0,
+      "quality_breakdown": {
+        "source_authority": 2.0,
+        "legal_relevance": 5.0,
+        "text_quality": 4.5,
+        "coverage": 4.0,
+        "provenance": 2.0,
+        "license_clarity": 5.0,
+        "metadata_quality": 4.0,
+        "duplication_safety": 4.5
+      },
+      "duplicate_of": null
+    },
+    {
+      "dataset_id": "KanoonGPT/indian-case-laws",
+      "visibility": "public",
+      "category": "CASE_LAW",
+      "license": "mit",
+      "license_status": "CLEAR",
+      "provenance": "Official / Primary Legal Repository",
+      "provenance_status": "VERIFIED",
+      "recommended": true,
+      "recommendation_status": "INCLUDE",
+      "reason": "High-quality primary Indian legal source meeting pretraining authority standards.",
+      "languages": [
+        "en"
+      ],
+      "legal_coverage": [
+        "Supreme Court",
+        "High Courts"
+      ],
+      "text_fields": [
+        "judgment",
+        "text"
+      ],
+      "estimated_rows": 110000,
+      "estimated_tokens": 95000000,
+      "quality_score": 37.0,
+      "quality_breakdown": {
+        "source_authority": 5.0,
+        "legal_relevance": 5.0,
+        "text_quality": 4.5,
+        "coverage": 4.0,
+        "provenance": 5.0,
+        "license_clarity": 5.0,
+        "metadata_quality": 4.0,
+        "duplication_safety": 4.5
+      },
+      "duplicate_of": null
+    },
+    {
+      "dataset_id": "Sumitedu/indian-case-laws",
+      "visibility": "public",
+      "category": "CASE_LAW",
+      "license": "mit",
+      "license_status": "CLEAR",
+      "provenance": "Community Contributed (Unverified Source)",
+      "provenance_status": "UNKNOWN",
+      "recommended": true,
+      "recommendation_status": "INCLUDE",
+      "reason": "High-quality primary Indian legal source meeting pretraining authority standards.",
+      "languages": [
+        "en"
+      ],
+      "legal_coverage": [
+        "Supreme Court",
+        "High Courts"
+      ],
+      "text_fields": [
+        "text"
+      ],
+      "estimated_rows": 30000,
+      "estimated_tokens": 28000000,
+      "quality_score": 31.0,
+      "quality_breakdown": {
+        "source_authority": 2.0,
+        "legal_relevance": 5.0,
+        "text_quality": 4.5,
+        "coverage": 4.0,
+        "provenance": 2.0,
+        "license_clarity": 5.0,
+        "metadata_quality": 4.0,
+        "duplication_safety": 4.5
+      },
+      "duplicate_of": null
+    },
+    {
+      "dataset_id": "debkanchan/supreme-court-of-india-judgements",
+      "visibility": "public",
+      "category": "CASE_LAW",
+      "license": "apache-2.0",
+      "license_status": "CLEAR",
+      "provenance": "Official / Primary Legal Repository",
+      "provenance_status": "VERIFIED",
+      "recommended": true,
+      "recommendation_status": "INCLUDE",
+      "reason": "High-quality primary Indian legal source meeting pretraining authority standards.",
+      "languages": [
+        "en"
+      ],
+      "legal_coverage": [
+        "Supreme Court of India (1950-2021)"
+      ],
+      "text_fields": [
+        "text",
+        "judgment_content"
+      ],
+      "estimated_rows": 40000,
+      "estimated_tokens": 80000000,
+      "quality_score": 37.0,
+      "quality_breakdown": {
+        "source_authority": 5.0,
+        "legal_relevance": 5.0,
+        "text_quality": 4.5,
+        "coverage": 4.0,
+        "provenance": 5.0,
+        "license_clarity": 5.0,
+        "metadata_quality": 4.0,
+        "duplication_safety": 4.5
+      },
+      "duplicate_of": null
+    },
+    {
+      "dataset_id": "123Divyansh/Constitution.-of-India-TXT_File",
+      "visibility": "public",
+      "category": "CONSTITUTIONAL",
+      "license": "cc0-1.0",
+      "license_status": "CLEAR",
+      "provenance": "Community Contributed (Unverified Source)",
+      "provenance_status": "UNKNOWN",
+      "recommended": true,
+      "recommendation_status": "INCLUDE",
+      "reason": "High-quality primary Indian legal source meeting pretraining authority standards.",
+      "languages": [
+        "en",
+        "hi"
+      ],
+      "legal_coverage": [
+        "Constitution of India",
+        "Articles 1-395",
+        "Amendments"
+      ],
+      "text_fields": [
+        "text"
+      ],
+      "estimated_rows": 500,
+      "estimated_tokens": 450000,
+      "quality_score": 31.0,
+      "quality_breakdown": {
+        "source_authority": 2.0,
+        "legal_relevance": 5.0,
+        "text_quality": 4.5,
+        "coverage": 4.0,
+        "provenance": 2.0,
+        "license_clarity": 5.0,
+        "metadata_quality": 4.0,
+        "duplication_safety": 4.5
+      },
+      "duplicate_of": null
+    },
+    {
+      "dataset_id": "SnehaDeshmukh/IndianBailJudgments-1200",
+      "visibility": "public",
+      "category": "LEGISLATION",
+      "license": "mit",
+      "license_status": "CLEAR",
+      "provenance": "Official / Primary Legal Repository",
+      "provenance_status": "VERIFIED",
+      "recommended": true,
+      "recommendation_status": "INCLUDE",
+      "reason": "High-quality primary Indian legal source meeting pretraining authority standards.",
+      "languages": [
+        "en"
+      ],
+      "legal_coverage": [
+        "Bail Orders",
+        "Section 437/439 CrPC",
+        "High Courts"
+      ],
+      "text_fields": [
+        "judgment_text",
+        "bail_reasoning"
+      ],
+      "estimated_rows": 1200,
+      "estimated_tokens": 3500000,
+      "quality_score": 37.0,
+      "quality_breakdown": {
+        "source_authority": 5.0,
+        "legal_relevance": 5.0,
+        "text_quality": 4.5,
+        "coverage": 4.0,
+        "provenance": 5.0,
+        "license_clarity": 5.0,
+        "metadata_quality": 4.0,
+        "duplication_safety": 4.5
+      },
+      "duplicate_of": null
+    },
+    {
+      "dataset_id": "navaneeth005/BNS_definitions",
+      "visibility": "public",
+      "category": "LEGISLATION",
+      "license": "mit",
+      "license_status": "CLEAR",
+      "provenance": "Community Contributed (Unverified Source)",
+      "provenance_status": "UNKNOWN",
+      "recommended": true,
+      "recommendation_status": "INCLUDE",
+      "reason": "High-quality primary Indian legal source meeting pretraining authority standards.",
+      "languages": [
+        "en",
+        "hi"
+      ],
+      "legal_coverage": [
+        "BNS 2023",
+        "IPC Mapping"
+      ],
+      "text_fields": [
+        "definition",
+        "section_text"
+      ],
+      "estimated_rows": 800,
+      "estimated_tokens": 600000,
+      "quality_score": 31.0,
+      "quality_breakdown": {
+        "source_authority": 2.0,
+        "legal_relevance": 5.0,
+        "text_quality": 4.5,
+        "coverage": 4.0,
+        "provenance": 2.0,
+        "license_clarity": 5.0,
+        "metadata_quality": 4.0,
+        "duplication_safety": 4.5
+      },
+      "duplicate_of": null
+    },
+    {
+      "dataset_id": "navaneeth005/BNS_detailed",
+      "visibility": "public",
+      "category": "LEGISLATION",
+      "license": "mit",
+      "license_status": "CLEAR",
+      "provenance": "Community Contributed (Unverified Source)",
+      "provenance_status": "UNKNOWN",
+      "recommended": true,
+      "recommendation_status": "INCLUDE",
+      "reason": "High-quality primary Indian legal source meeting pretraining authority standards.",
+      "languages": [
+        "en",
+        "hi"
+      ],
+      "legal_coverage": [
+        "BNS",
+        "BNSS",
+        "BSA (2023 Criminal Laws)"
+      ],
+      "text_fields": [
+        "clause_text",
+        "explanation"
+      ],
+      "estimated_rows": 2500,
+      "estimated_tokens": 2200000,
+      "quality_score": 31.0,
+      "quality_breakdown": {
+        "source_authority": 2.0,
+        "legal_relevance": 5.0,
+        "text_quality": 4.5,
+        "coverage": 4.0,
+        "provenance": 2.0,
+        "license_clarity": 5.0,
+        "metadata_quality": 4.0,
+        "duplication_safety": 4.5
+      },
+      "duplicate_of": null
+    },
+    {
+      "dataset_id": "navaneeth005/special_acts",
+      "visibility": "public",
+      "category": "LEGISLATION",
+      "license": "mit",
+      "license_status": "CLEAR",
+      "provenance": "Community Contributed (Unverified Source)",
+      "provenance_status": "UNKNOWN",
+      "recommended": true,
+      "recommendation_status": "INCLUDE",
+      "reason": "High-quality primary Indian legal source meeting pretraining authority standards.",
+      "languages": [
+        "en"
+      ],
+      "legal_coverage": [
+        "NDPS Act",
+        "POCSO Act",
+        "PMLA",
+        "UAPA",
+        "Negotiable Instruments Act"
+      ],
+      "text_fields": [
+        "act_text",
+        "provisions"
+      ],
+      "estimated_rows": 3200,
+      "estimated_tokens": 3000000,
+      "quality_score": 31.0,
+      "quality_breakdown": {
+        "source_authority": 2.0,
+        "legal_relevance": 5.0,
+        "text_quality": 4.5,
+        "coverage": 4.0,
+        "provenance": 2.0,
+        "license_clarity": 5.0,
+        "metadata_quality": 4.0,
+        "duplication_safety": 4.5
+      },
+      "duplicate_of": null
+    },
+    {
+      "dataset_id": "Shreyasrao/Indian-law-supreme-court-judgements-2016",
+      "visibility": "public",
+      "category": "CASE_LAW",
+      "license": "apache-2.0",
+      "license_status": "CLEAR",
+      "provenance": "Official / Primary Legal Repository",
+      "provenance_status": "VERIFIED",
+      "recommended": true,
+      "recommendation_status": "INCLUDE",
+      "reason": "High-quality primary Indian legal source meeting pretraining authority standards.",
+      "languages": [
+        "en"
+      ],
+      "legal_coverage": [
+        "Supreme Court (2016)"
+      ],
+      "text_fields": [
+        "text"
+      ],
+      "estimated_rows": 1800,
+      "estimated_tokens": 4200000,
+      "quality_score": 37.0,
+      "quality_breakdown": {
+        "source_authority": 5.0,
+        "legal_relevance": 5.0,
+        "text_quality": 4.5,
+        "coverage": 4.0,
+        "provenance": 5.0,
+        "license_clarity": 5.0,
+        "metadata_quality": 4.0,
+        "duplication_safety": 4.5
+      },
+      "duplicate_of": null
+    },
+    {
+      "dataset_id": "vihaannnn/Chunked-Indian-Supreme-Court-Judgements",
+      "visibility": "public",
+      "category": "CASE_LAW",
+      "license": "mit",
+      "license_status": "CLEAR",
+      "provenance": "Official / Primary Legal Repository",
+      "provenance_status": "VERIFIED",
+      "recommended": false,
+      "recommendation_status": "EXCLUDE",
+      "reason": "Duplicate or chunked variant of primary corpus: debkanchan/supreme-court-of-india-judgements",
+      "languages": [
+        "en"
+      ],
+      "legal_coverage": [
+        "Supreme Court"
+      ],
+      "text_fields": [
+        "chunk"
+      ],
+      "estimated_rows": 80000,
+      "estimated_tokens": 40000000,
+      "quality_score": 35.5,
+      "quality_breakdown": {
+        "source_authority": 5.0,
+        "legal_relevance": 5.0,
+        "text_quality": 4.5,
+        "coverage": 4.0,
+        "provenance": 5.0,
+        "license_clarity": 5.0,
+        "metadata_quality": 4.0,
+        "duplication_safety": 3.0
+      },
+      "duplicate_of": "debkanchan/supreme-court-of-india-judgements"
+    },
+    {
+      "dataset_id": "vihaannnn/Indian-Supreme-Court-Judgements-Chunked",
+      "visibility": "public",
+      "category": "CASE_LAW",
+      "license": "mit",
+      "license_status": "CLEAR",
+      "provenance": "Official / Primary Legal Repository",
+      "provenance_status": "VERIFIED",
+      "recommended": false,
+      "recommendation_status": "EXCLUDE",
+      "reason": "Duplicate or chunked variant of primary corpus: debkanchan/supreme-court-of-india-judgements",
+      "languages": [
+        "en"
+      ],
+      "legal_coverage": [
+        "Supreme Court"
+      ],
+      "text_fields": [
+        "chunk"
+      ],
+      "estimated_rows": 75000,
+      "estimated_tokens": 38000000,
+      "quality_score": 35.5,
+      "quality_breakdown": {
+        "source_authority": 5.0,
+        "legal_relevance": 5.0,
+        "text_quality": 4.5,
+        "coverage": 4.0,
+        "provenance": 5.0,
+        "license_clarity": 5.0,
+        "metadata_quality": 4.0,
+        "duplication_safety": 3.0
+      },
+      "duplicate_of": "debkanchan/supreme-court-of-india-judgements"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "shard_index": 0,
+  "num_sequences": 7,
+  "seq_len": 2048,
+  "dtype": "uint16",
+  "bytes": 28672
+}
