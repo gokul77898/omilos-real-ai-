@@ -39,3 +39,7 @@ runs/
 .env
 .env.local
 *.secret
+
+# Large legal corpus data (stored on Hugging Face, not GitHub)
+data/legal_clean/
+data/tokenized_128k_32k/
