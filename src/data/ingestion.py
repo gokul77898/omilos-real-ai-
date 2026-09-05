@@ -78,52 +78,185 @@ def build_corpus(
     seq_len: int, validation_percent: int = 5, max_seqs_per_shard: int = 500,
 ) -> dict[str, Any]:
     """Validate, deduplicate, deterministically split, pack and shard documents."""
-    if tokenizer.vocab_size != 32000 or (tokenizer.pad_token_id, tokenizer.unk_token_id, tokenizer.bos_token_id, tokenizer.eos_token_id) != (0, 1, 2, 3):
-        raise ValueError("The canonical corpus requires the 32K tokenizer with PAD/UNK/BOS/EOS IDs 0/1/2/3")
+    if tokenizer.vocab_size != 32000 or (
+        tokenizer.pad_token_id,
+        tokenizer.unk_token_id,
+        tokenizer.bos_token_id,
+        tokenizer.eos_token_id,
+    ) != (0, 1, 2, 3):
+        raise ValueError(
+            "The canonical corpus requires the 32K tokenizer with "
+            "PAD/UNK/BOS/EOS IDs 0/1/2/3"
+        )
+
     root = Path(output_dir)
-    train_writer = ShardWriter(root / "train", "train_shard", max_seqs_per_shard)
-    validation_writer = ShardWriter(root / "validation", "validation_shard", max_seqs_per_shard)
-    packers = {split: SequencePacker(seq_len, tokenizer.bos_token_id, tokenizer.eos_token_id) for split in ("train", "validation")}
-    writers = {"train": train_writer, "validation": validation_writer}
+    root.mkdir(parents=True, exist_ok=True)
+
+    train_writer = ShardWriter(
+        root / "train", "train_shard", max_seqs_per_shard
+    )
+    validation_writer = ShardWriter(
+        root / "validation", "validation_shard", max_seqs_per_shard
+    )
+
+    packers = {
+        split: SequencePacker(
+            seq_len,
+            tokenizer.bos_token_id,
+            tokenizer.eos_token_id,
+        )
+        for split in ("train", "validation")
+    }
+
+    writers = {
+        "train": train_writer,
+        "validation": validation_writer,
+    }
+
     dedup = DocumentDeduplicator()
-    rejected: list[dict[str, str]] = []
+
+    rejected_path = root / "rejected_documents.jsonl"
+
+    processed = 0
     accepted = 0
+    rejected_count = 0
     source_ids: set[str] = set()
-    for doc in documents:
-        result = validate_document(doc)
-        if not result.accepted:
-            rejected.append({"document_id": str(doc.get("document_id", "")), "reason": result.reason})
-            continue
-        cleaned = LegalTextCleaner.clean(doc["text"])
-        duplicate, reason = dedup.is_duplicate(cleaned, citation=str(doc.get("document_id")))
-        if duplicate:
-            rejected.append({"document_id": str(doc["document_id"]), "reason": reason})
-            continue
-        ids = tokenizer.encode(cleaned).ids
-        if not ids or min(ids) < 0 or max(ids) >= tokenizer.vocab_size:
-            rejected.append({"document_id": str(doc["document_id"]), "reason": "tokenizer failure or invalid token IDs"})
-            continue
-        split = stable_split(str(doc["document_id"]), validation_percent)
-        for sequence in packers[split].add_document(ids):
-            if 0 in sequence:
-                raise ValueError("Packed training data unexpectedly contains PAD=0")
-            writers[split].write_sequence(sequence)
-        accepted += 1
-        source_ids.add(str(doc["source_id"]))
+
+    with rejected_path.open("w", encoding="utf-8") as rejected_file:
+        for doc in documents:
+            processed += 1
+
+            result = validate_document(doc)
+
+            if not result.accepted:
+                rejected_count += 1
+                rejected_file.write(
+                    json.dumps(
+                        {
+                            "document_id": str(doc.get("document_id", "")),
+                            "reason": result.reason,
+                        },
+                        ensure_ascii=False,
+                    )
+                    + "\n"
+                )
+                continue
+
+            cleaned = LegalTextCleaner.clean(doc["text"])
+
+            duplicate, reason = dedup.is_duplicate(
+                cleaned,
+                citation=str(doc.get("document_id")),
+            )
+
+            if duplicate:
+                rejected_count += 1
+                rejected_file.write(
+                    json.dumps(
+                        {
+                            "document_id": str(doc["document_id"]),
+                            "reason": reason,
+                        },
+                        ensure_ascii=False,
+                    )
+                    + "\n"
+                )
+                continue
+
+            ids = tokenizer.encode(cleaned).ids
+
+            if not ids or min(ids) < 0 or max(ids) >= tokenizer.vocab_size:
+                rejected_count += 1
+                rejected_file.write(
+                    json.dumps(
+                        {
+                            "document_id": str(doc["document_id"]),
+                            "reason": "tokenizer failure or invalid token IDs",
+                        },
+                        ensure_ascii=False,
+                    )
+                    + "\n"
+                )
+                continue
+
+            split = stable_split(
+                str(doc["document_id"]),
+                validation_percent,
+            )
+
+            for sequence in packers[split].add_document(ids):
+                if 0 in sequence:
+                    raise ValueError(
+                        "Packed training data unexpectedly contains PAD=0"
+                    )
+                writers[split].write_sequence(sequence)
+
+            accepted += 1
+            source_ids.add(str(doc["source_id"]))
+
+            if processed % 10000 == 0:
+                print(
+                    f"[{processed:,}] processed | "
+                    f"accepted={accepted:,} | "
+                    f"rejected={rejected_count:,} | "
+                    f"train_seq={packers['train'].total_packed_sequences:,} | "
+                    f"val_seq={packers['validation'].total_packed_sequences:,}",
+                    flush=True,
+                )
+
     for packer in packers.values():
         packer.finalize()
+
     train_writer.close()
     validation_writer.close()
+
     if not train_writer.shards_written or not validation_writer.shards_written:
-        raise ValueError("Corpus has no complete train or validation shards; adjust sequence length or supply more data")
+        raise ValueError(
+            "Corpus has no complete train or validation shards; "
+            "adjust sequence length or supply more data"
+        )
+
     manifest = {
-        "format_version": "2.0.0", "preprocessing_version": PREPROCESSING_VERSION,
-        "tokenizer": {"vocab_size": tokenizer.vocab_size, "special_token_ids": {"pad": 0, "unk": 1, "bos": 2, "eos": 3}},
-        "sequence_length": seq_len, "validation_percent": validation_percent,
-        "split_strategy": "sha256(document_id) modulo 100", "source_ids": sorted(source_ids),
-        "accepted_documents": accepted, "rejected_documents": rejected,
-        "packing": {split: packer.get_stats() for split, packer in packers.items()},
-        "shards": {"train": [p.name for p in train_writer.shards_written], "validation": [p.name for p in validation_writer.shards_written]},
+        "format_version": "2.0.0",
+        "preprocessing_version": PREPROCESSING_VERSION,
+        "tokenizer": {
+            "vocab_size": tokenizer.vocab_size,
+            "special_token_ids": {
+                "pad": 0,
+                "unk": 1,
+                "bos": 2,
+                "eos": 3,
+            },
+        },
+        "sequence_length": seq_len,
+        "validation_percent": validation_percent,
+        "split_strategy": "sha256(document_id) modulo 100",
+        "source_ids": sorted(source_ids),
+        "processed_documents": processed,
+        "accepted_documents": accepted,
+        "rejected_documents": rejected_count,
+        "rejected_documents_file": rejected_path.name,
+        "packing": {
+            split: packer.get_stats()
+            for split, packer in packers.items()
+        },
+        "shards": {
+            "train": [p.name for p in train_writer.shards_written],
+            "validation": [p.name for p in validation_writer.shards_written],
+        },
     }
-    (root / "corpus_manifest.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
+
+    manifest_path = root / "corpus_manifest.json"
+
+    manifest_path.write_text(
+        json.dumps(manifest, indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
+
+    print(
+        f"BUILD COMPLETE | processed={processed:,} | "
+        f"accepted={accepted:,} | rejected={rejected_count:,}",
+        flush=True,
+    )
+
     return manifest

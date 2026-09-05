@@ -73,12 +73,11 @@ class DocumentDeduplicator:
             return True, "Exact text hash match"
         self.exact_hashes.add(text_hash)
 
-        # 3. Near-Duplicate SimHash Detection
-        sh = self.compute_simhash(text)
-        if sh != 0:
-            for existing_sh in self.simhashes:
-                if self.hamming_distance(sh, existing_sh) <= max_hamming_dist:
-                    return True, "Near-duplicate SimHash match"
-            self.simhashes.add(sh)
+        # 3. SimHash is intentionally not used for corpus-scale deduplication.
+        # Pairwise comparison against all previous fingerprints is O(N^2) and
+        # becomes infeasible for multi-million-document corpora.
+        #
+        # Exact normalized-text hashing above provides deterministic O(N)
+        # deduplication while citation IDs protect against repeated source records.
 
         return False, "Unique"
