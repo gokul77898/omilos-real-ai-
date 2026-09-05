@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import random
 import shutil
+import tempfile
 from typing import Any, Dict, Optional, Union
 import numpy as np
 import torch
@@ -47,10 +48,10 @@ def save_checkpoint(
     base_path = Path(save_dir)
     base_path.mkdir(parents=True, exist_ok=True)
     step_dir = base_path / f"checkpoint-step-{step}"
-    step_dir.mkdir(parents=True, exist_ok=True)
+    staging_dir = Path(tempfile.mkdtemp(prefix=f".checkpoint-step-{step}-", dir=base_path))
 
     # 1. Model weights
-    model_path = step_dir / "model.pt"
+    model_path = staging_dir / "model.pt"
     # Extract bare state_dict if wrapped in DDP or module
     raw_model = model.module if hasattr(model, "module") else model
     torch.save(raw_model.state_dict(), model_path)
@@ -70,7 +71,7 @@ def save_checkpoint(
             "torch_cuda": torch.cuda.get_rng_state_all() if torch.cuda.is_available() else None,
         },
     }
-    torch.save(training_state, step_dir / "training_state.pt")
+    torch.save(training_state, staging_dir / "training_state.pt")
 
     # 3. Metadata JSON
     metadata = {
@@ -78,8 +79,22 @@ def save_checkpoint(
         "epoch": epoch,
         "metrics": metrics or {},
     }
-    with open(step_dir / "metadata.json", "w", encoding="utf-8") as f:
+    with open(staging_dir / "metadata.json", "w", encoding="utf-8") as f:
         json.dump(metadata, f, indent=2)
+
+    # Verify all files are present and readable before publishing the checkpoint.
+    try:
+        if not all((staging_dir / name).is_file() for name in ("model.pt", "training_state.pt", "metadata.json")):
+            raise RuntimeError("checkpoint files missing after save")
+        torch.load(staging_dir / "model.pt", map_location="cpu", weights_only=True)
+        torch.load(staging_dir / "training_state.pt", map_location="cpu", weights_only=False)
+        json.loads((staging_dir / "metadata.json").read_text(encoding="utf-8"))
+        if step_dir.exists():
+            shutil.rmtree(step_dir)
+        os.replace(staging_dir, step_dir)
+    except Exception:
+        shutil.rmtree(staging_dir, ignore_errors=True)
+        raise
 
     # 4. Rotation policy: keep only the latest keep_last_n checkpoint directories
     if keep_last_n > 0:

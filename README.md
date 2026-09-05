@@ -4,7 +4,7 @@
 
 ---
 
-## Current Status: Phase 5 — 500M Model Training Engine Completed
+## Current Status: long-context pretraining stack (training intentionally not started)
 
 This repository contains the engineering foundation, custom subword tokenizer, core Qwen-style Transformer components, assembled `LegalCausalLM`, and a high-performance PyTorch training engine supporting our target **481.6M parameter model**.
 
@@ -53,3 +53,17 @@ python scripts/benchmark_training.py
 ```bash
 pytest -q
 ```
+
+## Canonical pretraining data path
+
+The real entrypoint is `scripts/train_pretrain.py`; it reads only validated binary
+shards from `data/tokenized_128k_32k/`.  It never creates synthetic training data.
+Build those shards from an operator-supplied JSONL provenance manifest first:
+
+```bash
+python scripts/build_long_context_corpus.py --input-jsonl /path/to/legal_sources.jsonl
+```
+
+Each source record must include `document_id`, `source_id`, `source_url`,
+`source_revision`, `license`, `language`, and `text`.  The builder records supplied
+evidence; it does not claim that a source is licensed or verified on its own.

@@ -21,10 +21,12 @@ def main() -> None:
 
     N = summary["total_trainable"]
     B = 4          # Micro-batch size
-    T = 2048       # Sequence length
+    T = cfg.max_seq_len
     L = cfg.num_layers
     H = cfg.hidden_size
     V = cfg.vocab_size
+    W = cfg.attention_window
+    C = cfg.attention_chunk_size
 
     # Memory calculations
     param_fp32_bytes = N * 4
@@ -39,6 +41,8 @@ def main() -> None:
     # With Gradient Checkpointing: ~ 2 * B * T * H * L * bytes + small overhead
     act_no_ckpt_bytes = 34 * B * T * H * L * 2
     act_with_ckpt_bytes = 4 * B * T * H * L * 2
+    # Upper-bound score workspace for one bounded attention chunk, not T².
+    local_attention_workspace_bytes = B * cfg.num_attention_heads * C * min(T, W + C) * 2
 
     total_train_fp16_no_ckpt = param_fp16_bytes + grad_fp32_bytes + optimizer_fp32_bytes + act_no_ckpt_bytes
     total_train_fp16_with_ckpt = param_fp16_bytes + grad_fp32_bytes + optimizer_fp32_bytes + act_with_ckpt_bytes
@@ -66,6 +70,7 @@ def main() -> None:
     print("-" * 65)
     print(f"Standard (No Checkpointing):      {act_no_ckpt_bytes / (1024**3):>8.2f} GB")
     print(f"With Gradient Checkpointing:      {act_with_ckpt_bytes / (1024**3):>8.2f} GB (Savings: ~{(1 - act_with_ckpt_bytes/act_no_ckpt_bytes)*100:.1f}%)")
+    print(f"Bounded attention workspace (per layer upper bound, W={W}, C={C}): {local_attention_workspace_bytes / (1024**3):.2f} GB")
 
     print("\n" + "-" * 65)
     print("ESTIMATED TOTAL TRAINING VRAM REQUIREMENTS")

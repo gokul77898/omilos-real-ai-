@@ -130,7 +130,7 @@ def generate_full_pretraining_corpus() -> list:
 
 
 def main() -> None:
-    builder = CorpusBuilder(tokenizer_path=str(PROJECT_ROOT / "artifacts" / "tokenizer" / "tokenizer.json"))
+    builder = CorpusBuilder(tokenizer_path=str(PROJECT_ROOT / "artifacts" / "tokenizer_32k" / "tokenizer.json"))
     raw_docs = generate_full_pretraining_corpus()
     manifest = builder.process_and_shard_corpus(raw_docs)
 

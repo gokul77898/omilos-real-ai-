@@ -260,7 +260,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Indian Legal Tokenizer CLI")
     parser.add_argument("--text", type=str, default="Section 187 BNSS के अंतर्गत (2024) 5 SCC 123 § 125", help="Text to tokenize")
     parser.add_argument("--corpus", type=str, default="data/synthetic_legal_corpus.txt", help="Path to training corpus")
-    parser.add_argument("--save-dir", type=str, default="artifacts/tokenizer", help="Directory to save/load tokenizer")
+    parser.add_argument("--save-dir", type=str, default="artifacts/tokenizer_32k", help="Directory to save/load tokenizer")
     parser.add_argument("--vocab-size", type=int, default=1000, help="Development vocab size")
     parser.add_argument("--add-special-tokens", action="store_true", help="Include BOS and EOS tokens in output")
     args = parser.parse_args()

@@ -33,6 +33,10 @@ model:
   intermediate_size: 1408
   max_seq_len: 2048
   rope_theta: 10000.0
+  rope_scaling_type: "linear"
+  rope_scaling_factor: 1.0
+  attention_window: 2048
+  attention_chunk_size: 1024
   rms_norm_eps: 1.0e-6
   tie_word_embeddings: true
 
@@ -50,6 +54,7 @@ training:
   max_grad_norm: 1.0
   mixed_precision: "auto"
   gradient_checkpointing: false
+  eval_max_batches: 50
 
 logging:
   level: "INFO"               # Options: "DEBUG", "INFO", "WARNING", "ERROR"

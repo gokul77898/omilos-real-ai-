@@ -84,3 +84,11 @@ def test_trainer_gradient_clipping_application():
     # Check that after step, gradients are zeroed or none
     for p in model.parameters():
         assert p.grad is None or torch.all(p.grad == 0)
+
+
+def test_trainer_rejects_empty_dataloader():
+    config = AppConfig()
+    config.model = ModelConfig(vocab_size=16, hidden_size=16, num_layers=1, max_seq_len=8)
+    empty = DataLoader(TensorDataset(torch.empty(0, 4, dtype=torch.long)), batch_size=2)
+    with pytest.raises(ValueError, match="empty"):
+        Trainer(LegalCausalLM(config.model), config, empty, device="cpu")

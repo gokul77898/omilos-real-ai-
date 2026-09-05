@@ -13,6 +13,7 @@ from src.data.hf_discovery import (
 from src.data.packer import SequencePacker
 from src.data.registry import DatasetRegistry
 from src.data.sharding import ShardWriter, ShardedDataset
+from src.data.sft import LegalInstructionExample
 
 __all__ = [
     "DatasetCategory",
@@ -30,4 +31,5 @@ __all__ = [
     "ShardWriter",
     "ShardedDataset",
     "CorpusBuilder",
+    "LegalInstructionExample",
 ]

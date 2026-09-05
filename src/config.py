@@ -62,6 +62,12 @@ class ModelConfig:
     intermediate_size: int = 1408
     max_seq_len: int = 2048
     rope_theta: float = 10000.0
+    # Linear RoPE position interpolation.  A factor of 1.0 is plain RoPE.
+    rope_scaling_type: str = "linear"
+    rope_scaling_factor: float = 1.0
+    # Bounded causal local-attention controls.  They do not change parameter shapes.
+    attention_window: int = 2048
+    attention_chunk_size: int = 1024
     rms_norm_eps: float = 1e-6
     tie_word_embeddings: bool = True
 
@@ -86,6 +92,7 @@ class TrainingConfig:
     max_grad_norm: float = 1.0
     mixed_precision: str = "auto"
     gradient_checkpointing: bool = False
+    eval_max_batches: int = 50
 
 
 @dataclass
@@ -169,6 +176,13 @@ def _validate_dict_structure(raw: dict[str, Any]) -> None:
         raise ConfigValidationError("Field 'model.rms_norm_eps' must be a positive float.")
     if not isinstance(m.get("tie_word_embeddings", True), bool):
         raise ConfigValidationError("Field 'model.tie_word_embeddings' must be a boolean.")
+    if m.get("rope_scaling_type", "linear") not in {"linear", "none"}:
+        raise ConfigValidationError("Field 'model.rope_scaling_type' must be 'linear' or 'none'.")
+    if not isinstance(m.get("rope_scaling_factor", 1.0), (int, float)) or m.get("rope_scaling_factor", 1.0) < 1.0:
+        raise ConfigValidationError("Field 'model.rope_scaling_factor' must be a number >= 1.")
+    for name in ("attention_window", "attention_chunk_size"):
+        if not isinstance(m.get(name, m["max_seq_len"]), int) or m.get(name, m["max_seq_len"]) <= 0:
+            raise ConfigValidationError(f"Field 'model.{name}' must be a positive integer.")
 
     # Training validation
     t = raw["training"]
@@ -184,6 +198,8 @@ def _validate_dict_structure(raw: dict[str, Any]) -> None:
         raise ConfigValidationError("Field 'training.max_steps' must be a positive integer.")
     if not isinstance(t.get("warmup_steps"), int) or t["warmup_steps"] < 0:
         raise ConfigValidationError("Field 'training.warmup_steps' must be a non-negative integer.")
+    if not isinstance(t.get("eval_max_batches", 50), int) or t.get("eval_max_batches", 50) <= 0:
+        raise ConfigValidationError("Field 'training.eval_max_batches' must be a positive integer.")
 
     # Logging validation
     log_level = str(raw["logging"].get("level", "")).upper()
@@ -242,6 +258,10 @@ def load_config(config_path: str | Path = "configs/base.yaml") -> AppConfig:
         intermediate_size=int(m_data.get("intermediate_size", int(m_data["hidden_size"] * 8 / 3))),
         max_seq_len=int(m_data["max_seq_len"]),
         rope_theta=float(m_data.get("rope_theta", 10000.0)),
+        rope_scaling_type=str(m_data.get("rope_scaling_type", "linear")),
+        rope_scaling_factor=float(m_data.get("rope_scaling_factor", 1.0)),
+        attention_window=int(m_data.get("attention_window", m_data["max_seq_len"])),
+        attention_chunk_size=int(m_data.get("attention_chunk_size", min(1024, m_data["max_seq_len"]))),
         rms_norm_eps=float(m_data.get("rms_norm_eps", 1e-6)),
         tie_word_embeddings=bool(m_data.get("tie_word_embeddings", True)),
     )
@@ -261,6 +281,7 @@ def load_config(config_path: str | Path = "configs/base.yaml") -> AppConfig:
         max_grad_norm=float(t_data.get("max_grad_norm", 1.0)),
         mixed_precision=str(t_data.get("mixed_precision", "auto")),
         gradient_checkpointing=bool(t_data.get("gradient_checkpointing", False)),
+        eval_max_batches=int(t_data.get("eval_max_batches", 50)),
     )
 
     l_data = raw_data["logging"]

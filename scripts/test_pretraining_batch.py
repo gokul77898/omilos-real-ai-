@@ -26,8 +26,10 @@ def main() -> None:
 
     # 1. Load memory-mapped sharded dataset
     train_shard_dir = PROJECT_ROOT / "data" / "tokenized" / "train"
-    dataset = ShardedDataset(train_shard_dir, seq_len=2048)
+    dataset = ShardedDataset(train_shard_dir, seq_len=2048, vocab_size=app_config.model.vocab_size, reject_pad=True)
     print(f"Found {len(dataset)} pre-packed 2048-token sequences across {len(dataset.bin_files)} binary shards.", flush=True)
+    if len(dataset) == 0:
+        raise RuntimeError("No binary training shards are available; run the explicit corpus builder first.")
 
     dataloader = DataLoader(dataset, batch_size=1, shuffle=False)
     batch = next(iter(dataloader))

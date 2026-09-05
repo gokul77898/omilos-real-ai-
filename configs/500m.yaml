@@ -31,8 +31,12 @@ model:
   num_attention_heads: 18
   num_kv_heads: 6
   intermediate_size: 4352
-  max_seq_len: 2048
+  max_seq_len: 131072
   rope_theta: 10000.0
+  rope_scaling_type: "linear"
+  rope_scaling_factor: 64.0
+  attention_window: 8192
+  attention_chunk_size: 1024
   rms_norm_eps: 1.0e-6
   tie_word_embeddings: true
 
@@ -50,6 +54,7 @@ training:
   max_grad_norm: 1.0
   mixed_precision: "auto"
   gradient_checkpointing: true
+  eval_max_batches: 25
 
 logging:
   level: "INFO"

@@ -175,7 +175,9 @@ class LegalCausalLM(nn.Module):
             embed_params + blocks_trainable + final_norm_params + lm_head_params
         )
         total_buffers = blocks_buffers
-        total_params = total_trainable + total_buffers
+        # Buffers (for example RoPE caches) are reported separately: they are not
+        # learned model parameters and must not change compatibility counts.
+        total_params = total_trainable
 
         return {
             "token_embeddings": embed_params,

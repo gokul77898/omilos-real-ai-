@@ -12,13 +12,13 @@ class LegalTextCleaner:
 
     # Preserved citation patterns e.g. (2023) 5 SCC 123, 2024 INSC 123, AIR 1980 SC 1789, § 125, Section 302 IPC
     CITATION_PATTERNS = [
-        r"\d{4}\s+INSC\s+\d+",
-        r"AIR\s+\d{4}\s+(?:SC|HC|Bom|Del|Mad|Cal|All)\s+\d+",
+        r"\b\d{4}\s+INSC\s+\d+\b",
+        r"\bAIR\s+\d{4}\s+(?:SC|HC|Bom|Del|Mad|Cal|All)\s+\d+\b",
         r"\(\d{4}\)\s+\d+\s+SCC\s+\d+",
-        r"ILR\s+\d{4}\s+\w+\s+\d+",
+        r"\bILR\s+\d{4}\s+\w+\s+\d+\b",
         r"§\s*\d+[A-Z]?",
-        r"Section\s+\d+[A-Za-z]*(?:\s+of\s+the\s+[A-Za-z\s,]+)?",
-        r"Article\s+\d+[A-Za-z]*(?:\s+of\s+the\s+Constitution)?",
+        r"\bSection\s+\d+[A-Za-z]*(?:\s+of\s+the\s+[A-Za-z\s,]+)?",
+        r"\bArticle\s+\d+[A-Za-z]*(?:\s+of\s+the\s+Constitution)?",
     ]
 
     @classmethod

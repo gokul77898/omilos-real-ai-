@@ -38,6 +38,8 @@ class GroupedQueryAttention(nn.Module):
         self.head_dim = config.hidden_size // config.num_attention_heads
         self.num_kv_groups = self.num_heads // self.num_kv_heads
         self.max_seq_len = config.max_seq_len
+        self.attention_window = min(config.attention_window, config.max_seq_len)
+        self.attention_chunk_size = config.attention_chunk_size
 
         if self.hidden_size % self.num_heads != 0:
             raise ValueError(f"hidden_size ({self.hidden_size}) must be divisible by num_heads ({self.num_heads})")
@@ -55,6 +57,8 @@ class GroupedQueryAttention(nn.Module):
             dim=self.head_dim,
             max_position_embeddings=self.max_seq_len,
             base=config.rope_theta,
+            scaling_type=config.rope_scaling_type,
+            scaling_factor=config.rope_scaling_factor,
         )
 
         self._init_weights()
@@ -101,18 +105,43 @@ class GroupedQueryAttention(nn.Module):
         k = repeat_kv(k, self.num_kv_groups)  # [B, H_q, T, D]
         v = repeat_kv(v, self.num_kv_groups)  # [B, H_q, T, D]
 
-        # 5. Scaled Dot-Product Attention with Causal Masking
-        attn_output = F.scaled_dot_product_attention(
-            q,
-            k,
-            v,
-            attn_mask=attention_mask,
-            dropout_p=0.0,
-            is_causal=(attention_mask is None),
-        )
+        # 5. Bounded local causal attention.  We build only [query_chunk, window]
+        # masks, never a dense [T, T] mask.  A supplied padding mask is combined
+        # with (not substituted for) the causal mask.
+        padding_mask = self._normalize_padding_mask(attention_mask, batch_size, seq_len, x.device)
+        chunks = []
+        for q_start in range(0, seq_len, self.attention_chunk_size):
+            q_end = min(seq_len, q_start + self.attention_chunk_size)
+            k_start = max(0, q_start - self.attention_window + 1)
+            q_chunk = q[:, :, q_start:q_end, :]
+            k_chunk = k[:, :, k_start:q_end, :]
+            v_chunk = v[:, :, k_start:q_end, :]
+
+            q_positions = torch.arange(q_start, q_end, device=x.device)[:, None]
+            k_positions = torch.arange(k_start, q_end, device=x.device)[None, :]
+            allowed = (k_positions <= q_positions) & (k_positions >= (q_positions - self.attention_window + 1))
+            if padding_mask is not None:
+                allowed = allowed[None, None, :, :] & padding_mask[:, None, None, k_start:q_end]
+            else:
+                allowed = allowed[None, None, :, :]
+            chunks.append(F.scaled_dot_product_attention(
+                q_chunk, k_chunk, v_chunk, attn_mask=allowed, dropout_p=0.0, is_causal=False,
+            ))
+        attn_output = torch.cat(chunks, dim=2)
 
         # 6. Transpose and reshape back to [B, T, H]
         attn_output = attn_output.transpose(1, 2).contiguous().view(batch_size, seq_len, self.hidden_size)
 
         # 7. Output projection
         return self.o_proj(attn_output)
+
+    @staticmethod
+    def _normalize_padding_mask(
+        attention_mask: Optional[torch.Tensor], batch_size: int, seq_len: int, device: torch.device
+    ) -> Optional[torch.Tensor]:
+        """Return a [B, T] boolean valid-token mask; reject ambiguous mask shapes."""
+        if attention_mask is None:
+            return None
+        if attention_mask.ndim != 2 or tuple(attention_mask.shape) != (batch_size, seq_len):
+            raise ValueError("attention_mask must have shape [batch_size, seq_len] with 1/True for valid tokens")
+        return attention_mask.to(device=device, dtype=torch.bool)

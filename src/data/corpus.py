@@ -19,7 +19,7 @@ from src.tokenizer import LegalTokenizer
 class CorpusBuilder:
     """Builds and audits the complete Indian Legal Pretraining Corpus."""
 
-    def __init__(self, tokenizer_path: str = "artifacts/tokenizer/tokenizer.json") -> None:
+    def __init__(self, tokenizer_path: str = "artifacts/tokenizer_32k/tokenizer.json") -> None:
         p = Path(tokenizer_path)
         if p.is_file():
             self.tokenizer = LegalTokenizer.load(p.parent)
@@ -76,13 +76,14 @@ class CorpusBuilder:
     def process_and_shard_corpus(
         self,
         raw_documents: List[Dict[str, Any]],
-        train_dir: str = "data/tokenized/train",
-        val_dir: str = "data/tokenized/validation",
+        train_dir: str = "data/demo_tokenized_2k/train",
+        val_dir: str = "data/demo_tokenized_2k/validation",
         train_split_ratio: float = 0.95,
+        manifest_path: str = "data/manifests/demo_corpus.json",
     ) -> Dict[str, Any]:
         """Clean, classify, deduplicate, split (95/5), pack into 2048-token sequences, and write memory-mapped shards."""
-        train_packer = SequencePacker(max_seq_len=2048, bos_id=1, eos_id=2)
-        val_packer = SequencePacker(max_seq_len=2048, bos_id=1, eos_id=2)
+        train_packer = SequencePacker(max_seq_len=2048, bos_id=self.tokenizer.bos_token_id, eos_id=self.tokenizer.eos_token_id)
+        val_packer = SequencePacker(max_seq_len=2048, bos_id=self.tokenizer.bos_token_id, eos_id=self.tokenizer.eos_token_id)
 
         train_writer = ShardWriter(train_dir, shard_prefix="train_shard", max_seqs_per_shard=500)
         val_writer = ShardWriter(val_dir, shard_prefix="val_shard", max_seqs_per_shard=500)
@@ -151,6 +152,8 @@ class CorpusBuilder:
                 for s in seqs:
                     val_writer.write_sequence(s)
 
+        train_packer.finalize()
+        val_packer.finalize()
         train_writer.close()
         val_writer.close()
 
@@ -161,7 +164,7 @@ class CorpusBuilder:
         manifest = {
             "version": "1.0.0",
             "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-            "tokenizer": "artifacts/tokenizer/tokenizer.json",
+            "tokenizer": "artifacts/tokenizer_32k/tokenizer.json",
             "sequence_length": 2048,
             "raw_documents": self.total_raw_docs,
             "unique_documents": self.total_unique_docs,
@@ -180,7 +183,7 @@ class CorpusBuilder:
             "domain_tokens": self.domain_tokens,
         }
 
-        with open("data/manifests/final_corpus.json", "w", encoding="utf-8") as f:
+        with open(manifest_path, "w", encoding="utf-8") as f:
             json.dump(manifest, f, indent=2)
 
         return manifest

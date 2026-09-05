@@ -67,8 +67,8 @@ class CourtClassifier:
     }
 
     TRIBUNAL_PATTERNS = [
-        r"nclt", r"nclat", r"itat", r"cat", r"ngt", r"aptel",
-        r"drat", r"cestat", r"tribunal",
+        r"\bnclt\b", r"\bnclat\b", r"\bitat\b", r"\bcat\b", r"\bngt\b", r"\baptel\b",
+        r"\bdrat\b", r"\bcestat\b", r"tribunal",
     ]
 
     LEGAL_DOMAINS = [

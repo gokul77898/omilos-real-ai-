@@ -2,6 +2,7 @@
 """Model summary, parameter breakdown, and memory estimation CLI tool."""
 
 import sys
+import argparse
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -13,7 +14,12 @@ from src.model import LegalCausalLM
 
 
 def main() -> None:
-    config_path = PROJECT_ROOT / "configs" / "base.yaml"
+    parser = argparse.ArgumentParser(description="Summarize an Omilos model configuration")
+    parser.add_argument("--config", default="configs/500m.yaml")
+    args = parser.parse_args()
+    config_path = Path(args.config)
+    if not config_path.is_absolute():
+        config_path = PROJECT_ROOT / config_path
     app_config = load_config(config_path)
     model_cfg = app_config.model
 

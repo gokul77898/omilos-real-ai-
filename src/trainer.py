@@ -66,6 +66,9 @@ class Trainer:
 
         self.train_dataloader = train_dataloader
         self.eval_dataloader = eval_dataloader
+        self._require_nonempty_dataloader(train_dataloader, "training")
+        if eval_dataloader is not None:
+            self._require_nonempty_dataloader(eval_dataloader, "validation")
 
         # 2. Optimizer setup
         if optimizer is not None:
@@ -120,12 +123,36 @@ class Trainer:
     def _prepare_batch(self, batch: Union[Dict[str, torch.Tensor], Tuple[torch.Tensor, ...]]) -> Dict[str, torch.Tensor]:
         """Move batch elements to the active training device."""
         if isinstance(batch, dict):
-            return {k: v.to(self.device) if isinstance(v, torch.Tensor) else v for k, v in batch.items()}
+            result = {k: v.to(self.device) if isinstance(v, torch.Tensor) else v for k, v in batch.items()}
+            if "input_ids" not in result:
+                raise ValueError("Dictionary batches must contain input_ids")
+            return result
         elif isinstance(batch, (list, tuple)):
             input_ids = batch[0].to(self.device)
             labels = batch[1].to(self.device) if len(batch) > 1 else input_ids
             return {"input_ids": input_ids, "labels": labels}
         raise ValueError(f"Unsupported batch format: {type(batch)}")
+
+    @staticmethod
+    def _require_nonempty_dataloader(dataloader: DataLoader, name: str) -> None:
+        """Fail before entering a loop which could otherwise spin forever."""
+        try:
+            if len(dataloader) == 0:
+                raise ValueError(f"{name.capitalize()} DataLoader is empty")
+        except TypeError:
+            # Iterable datasets have no reliable length; their first batch is
+            # validated by the regular training/evaluation path.
+            pass
+
+    def _validate_training_batch(self, input_ids: torch.Tensor, labels: torch.Tensor, attention_mask: Optional[torch.Tensor]) -> None:
+        if input_ids.ndim != 2 or input_ids.shape[1] > self.config.model.max_seq_len:
+            raise ValueError("Batch sequence length is invalid or exceeds model.max_seq_len")
+        if input_ids.numel() == 0 or input_ids.min().item() < 0 or input_ids.max().item() >= self.config.model.vocab_size:
+            raise ValueError("input_ids contain invalid token IDs")
+        if labels.shape != input_ids.shape:
+            raise ValueError("labels must have the same shape as input_ids")
+        if attention_mask is not None and attention_mask.shape != input_ids.shape:
+            raise ValueError("attention_mask must have the same shape as input_ids")
 
     def train_step(self, batch: Any) -> float:
         """Execute a single forward-backward-accumulate micro step.
@@ -138,6 +165,7 @@ class Trainer:
         input_ids = batch["input_ids"]
         labels = batch.get("labels", input_ids)
         attention_mask = batch.get("attention_mask", None)
+        self._validate_training_batch(input_ids, labels, attention_mask)
 
         self.micro_step += 1
         num_tokens = input_ids.numel()
@@ -181,18 +209,26 @@ class Trainer:
         return raw_loss_val
 
     @torch.no_grad()
-    def evaluate(self, eval_dataloader: Optional[DataLoader] = None) -> Dict[str, float]:
+    def evaluate(self, eval_dataloader: Optional[DataLoader] = None, max_batches: Optional[int] = None) -> Dict[str, float]:
         """Run validation evaluation over dataset and compute loss and perplexity."""
         dataloader = eval_dataloader or self.eval_dataloader
         if dataloader is None:
             return {}
+        self._require_nonempty_dataloader(dataloader, "validation")
+        limit = max_batches or self.train_cfg.eval_max_batches
 
         self.model.eval()
         total_loss = 0.0
         total_batches = 0
 
-        for batch in dataloader:
+        total_sequences = 0
+        total_tokens = 0
+        was_training = self.model.training
+        for batch_idx, batch in enumerate(dataloader):
+            if batch_idx >= limit:
+                break
             batch = self._prepare_batch(batch)
+            self._validate_training_batch(batch["input_ids"], batch.get("labels", batch["input_ids"]), batch.get("attention_mask"))
             output = self.model(
                 input_ids=batch["input_ids"],
                 labels=batch.get("labels", batch["input_ids"]),
@@ -200,6 +236,8 @@ class Trainer:
             )
             total_loss += output.loss.item()
             total_batches += 1
+            total_sequences += batch["input_ids"].shape[0]
+            total_tokens += batch["input_ids"].numel()
 
         mean_loss = total_loss / max(1, total_batches)
         try:
@@ -207,10 +245,13 @@ class Trainer:
         except OverflowError:
             perplexity = float("inf")
 
-        self.model.train()
+        self.model.train(was_training)
         return {
             "eval_loss": mean_loss,
             "perplexity": perplexity,
+            "eval_batches": total_batches,
+            "eval_sequences": total_sequences,
+            "eval_tokens": total_tokens,
         }
 
     def train(self, max_steps: Optional[int] = None) -> Dict[str, Any]:

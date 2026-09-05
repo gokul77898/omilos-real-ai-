@@ -3,11 +3,16 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 import numpy as np
 import torch
 from torch.utils.data import Dataset
+
+
+class ShardIntegrityError(ValueError):
+    """Raised when a token shard or its metadata is malformed or inconsistent."""
 
 
 class ShardWriter:
@@ -25,7 +30,14 @@ class ShardWriter:
 
     def write_sequence(self, seq: np.ndarray) -> Optional[Path]:
         """Add a 2048-token sequence and write shard when capacity is reached."""
-        self.current_buffer.append(seq)
+        array = np.asarray(seq)
+        if array.ndim != 1 or array.size == 0:
+            raise ShardIntegrityError("A sequence must be a non-empty one-dimensional array")
+        if np.any(array < 0) or np.any(array > np.iinfo(np.uint16).max):
+            raise ShardIntegrityError("Token IDs must fit uint16 storage")
+        if self.current_buffer and array.size != self.current_buffer[0].size:
+            raise ShardIntegrityError("All sequences in a shard must have the same length")
+        self.current_buffer.append(array.astype(np.uint16, copy=False))
         if len(self.current_buffer) >= self.max_seqs_per_shard:
             return self._flush_shard()
         return None
@@ -41,7 +53,9 @@ class ShardWriter:
         shard_meta = self.output_dir / f"{self.shard_prefix}_{self.current_shard_idx:05d}.json"
 
         data = np.stack(self.current_buffer, axis=0).astype(np.uint16)
-        data.tofile(shard_bin)
+        tmp_bin = shard_bin.with_suffix(".bin.tmp")
+        data.tofile(tmp_bin)
+        os.replace(tmp_bin, shard_bin)
 
         meta = {
             "shard_index": self.current_shard_idx,
@@ -50,8 +64,10 @@ class ShardWriter:
             "dtype": "uint16",
             "bytes": int(data.nbytes),
         }
-        with open(shard_meta, "w", encoding="utf-8") as f:
+        tmp_meta = shard_meta.with_suffix(".json.tmp")
+        with open(tmp_meta, "w", encoding="utf-8") as f:
             json.dump(meta, f, indent=2)
+        os.replace(tmp_meta, shard_meta)
 
         self.shards_written.append(shard_bin)
         self.current_shard_idx += 1
@@ -62,9 +78,12 @@ class ShardWriter:
 class ShardedDataset(Dataset):
     """Memory-mapped dataset reading directly from pre-tokenized binary shards on disk without RAM bloat."""
 
-    def __init__(self, shard_dir: Union[str, Path], seq_len: int = 2048) -> None:
+    def __init__(self, shard_dir: Union[str, Path], seq_len: int = 2048, vocab_size: Optional[int] = None, reject_pad: bool = False) -> None:
         self.shard_dir = Path(shard_dir)
         self.seq_len = seq_len
+        self.vocab_size = vocab_size
+        if seq_len <= 0:
+            raise ShardIntegrityError("seq_len must be positive")
         self.bin_files = sorted(list(self.shard_dir.glob("*.bin")))
 
         self.shard_offsets: List[int] = [0]
@@ -74,12 +93,30 @@ class ShardedDataset(Dataset):
         total = 0
         for bin_file in self.bin_files:
             file_bytes = bin_file.stat().st_size
+            meta_file = bin_file.with_suffix(".json")
+            if not meta_file.exists():
+                raise ShardIntegrityError(f"Missing metadata for shard: {bin_file.name}")
+            try:
+                meta = json.loads(meta_file.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError) as exc:
+                raise ShardIntegrityError(f"Unreadable metadata for shard: {bin_file.name}") from exc
+            expected_bytes = int(meta.get("num_sequences", -1)) * int(meta.get("seq_len", -1)) * 2
+            if meta.get("dtype") != "uint16" or meta.get("seq_len") != seq_len or meta.get("bytes") != expected_bytes:
+                raise ShardIntegrityError(f"Invalid metadata for shard: {bin_file.name}")
+            if file_bytes != expected_bytes or file_bytes % (seq_len * 2) != 0:
+                raise ShardIntegrityError(f"Truncated or misaligned shard: {bin_file.name}")
             num_seqs = file_bytes // (seq_len * 2)  # uint16 is 2 bytes
+            if num_seqs == 0:
+                raise ShardIntegrityError(f"Shard contains zero sequences: {bin_file.name}")
             self.shard_lengths.append(num_seqs)
             total += num_seqs
             self.shard_offsets.append(total)
             # Memory map
             m = np.memmap(bin_file, dtype=np.uint16, mode="r", shape=(num_seqs, seq_len))
+            if vocab_size is not None and (vocab_size <= 0 or np.any(m >= vocab_size)):
+                raise ShardIntegrityError(f"Token ID outside vocabulary range in shard: {bin_file.name}")
+            if reject_pad and np.any(m == 0):
+                raise ShardIntegrityError(f"PAD=0 found in packed training shard: {bin_file.name}")
             self.mmaps.append(m)
 
         self.total_sequences = total
