@@ -36,10 +36,70 @@ def main() -> None:
     train_dl = DataLoader(train, batch_size=cfg.training.batch_size, shuffle=True)
     eval_dl = DataLoader(validation, batch_size=1, shuffle=False)
     trainer = Trainer(LegalCausalLM(cfg.model), cfg, train_dl, eval_dl, device=args.device)
-    meta = load_checkpoint(args.resume, trainer.model, trainer.optimizer, trainer.scheduler, trainer.scaler, trainer.device)
-    trainer.global_step, trainer.epoch = meta["step"], meta["epoch"]
-    if trainer.global_step <= 0:
-        raise ValueError("Resume checkpoint lacks a positive global step")
+
+    resume_dir = Path(args.resume)
+    training_state = resume_dir / "training_state.pt"
+
+    if training_state.exists():
+        meta = load_checkpoint(
+            resume_dir,
+            trainer.model,
+            trainer.optimizer,
+            trainer.scheduler,
+            trainer.scaler,
+            trainer.device,
+        )
+        trainer.global_step = meta["step"]
+        trainer.epoch = meta["epoch"]
+
+        if trainer.global_step <= 0:
+            raise ValueError("Full resume checkpoint lacks a positive global step")
+
+        print(
+            f"FULL RESUME: step={trainer.global_step}, epoch={trainer.epoch}",
+            flush=True,
+        )
+    else:
+        model_file = resume_dir / "model.pt"
+
+        if not model_file.exists():
+            raise FileNotFoundError(
+                f"No model.pt in weights-only checkpoint: {resume_dir}"
+            )
+
+        import torch
+
+        state = torch.load(
+            model_file,
+            map_location=trainer.device,
+            weights_only=True,
+        )
+
+        if "model_state_dict" in state:
+            state = state["model_state_dict"]
+        elif "state_dict" in state:
+            state = state["state_dict"]
+
+        raw_model = trainer.model
+
+        missing, unexpected = raw_model.load_state_dict(
+            state,
+            strict=False,
+        )
+
+        if missing or unexpected:
+            raise RuntimeError(
+                f"Weights-only checkpoint mismatch: "
+                f"missing={missing}, unexpected={unexpected}"
+            )
+
+        print(
+            "WEIGHTS-ONLY INITIALIZATION: "
+            "step-5000 model weights loaded; "
+            "fresh optimizer/scheduler for new training phase.",
+            flush=True,
+        )
+
     trainer.train(max_steps=args.max_steps)
 
 if __name__ == "__main__":

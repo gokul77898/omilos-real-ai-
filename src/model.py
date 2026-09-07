@@ -112,6 +112,7 @@ class LegalCausalLM(nn.Module):
         input_ids: torch.Tensor,
         labels: Optional[torch.Tensor] = None,
         attention_mask: Optional[torch.Tensor] = None,
+        return_logits: bool = True,
     ) -> CausalLMOutput:
         """Forward pass through the causal language model.
 
@@ -143,13 +144,29 @@ class LegalCausalLM(nn.Module):
         # 3. Final Normalization
         hidden_states = self.norm(hidden_states)
 
-        # 4. Project to vocabulary logits: [B, T, H] -> [B, T, V]
-        logits = self.lm_head(hidden_states)
-
-        # 5. Optional loss calculation
+        # 4. Optional vocabulary projection / loss.
+        #
+        # For long-context training, avoid materializing the full
+        # [B, T, V] logits tensor. The loss implementation projects
+        # 1024 time positions at a time.
         loss = None
+
         if labels is not None:
-            loss = compute_causal_lm_loss(logits, labels)
+            loss = compute_causal_lm_loss(
+                hidden_states,
+                labels,
+                self.lm_head,
+                chunk_size=1024,
+            )
+
+        if return_logits:
+            logits = self.lm_head(hidden_states)
+        else:
+            logits = torch.empty(
+                0,
+                device=hidden_states.device,
+                dtype=hidden_states.dtype,
+            )
 
         return CausalLMOutput(logits=logits, loss=loss)
 

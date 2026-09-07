@@ -1,4 +1,4 @@
-"""Causal Language Model loss computation with shifted predictions and targets."""
+"""Memory-efficient causal language-model loss."""
 
 from __future__ import annotations
 
@@ -7,43 +7,73 @@ import torch.nn.functional as F
 
 
 def compute_causal_lm_loss(
-    logits: torch.Tensor,
+    hidden_states: torch.Tensor,
     labels: torch.Tensor,
+    lm_head: torch.nn.Module,
     ignore_index: int = -100,
+    chunk_size: int = 1024,
 ) -> torch.Tensor:
-    """Compute autoregressive next-token cross-entropy loss.
+    """Compute causal next-token loss without materializing full 128K logits.
 
-    Aligns predictions and targets such that token at position t predicts token at t+1:
-        shift_logits = logits[..., :-1, :]
-        shift_labels = labels[..., 1:]
-
-    Args:
-        logits: Unnormalized model predictions of shape [batch_size, seq_len, vocab_size].
-        labels: Target token IDs of shape [batch_size, seq_len].
-        ignore_index: Target index to ignore in loss calculation (default: -100).
-
-    Returns:
-        Scalar loss tensor.
+    Instead of constructing [B, T, V] logits for the whole sequence, the
+    vocabulary projection and cross-entropy are evaluated in time chunks.
+    This preserves the exact causal-LM objective while keeping peak memory
+    bounded for very long sequences.
     """
-    if logits.ndim != 3:
-        raise ValueError(f"Expected logits of rank 3 [B, T, V], got shape {list(logits.shape)}")
-    if labels.ndim != 2:
-        raise ValueError(f"Expected labels of rank 2 [B, T], got shape {list(labels.shape)}")
-    if logits.shape[0] != labels.shape[0] or logits.shape[1] != labels.shape[1]:
+    if hidden_states.ndim != 3:
         raise ValueError(
-            f"Shape mismatch between logits ({list(logits.shape)}) and labels ({list(labels.shape)})"
+            f"Expected hidden_states rank 3 [B, T, H], "
+            f"got {list(hidden_states.shape)}"
+        )
+    if labels.ndim != 2:
+        raise ValueError(
+            f"Expected labels rank 2 [B, T], got {list(labels.shape)}"
+        )
+    if hidden_states.shape[0] != labels.shape[0]:
+        raise ValueError("Batch size mismatch between hidden_states and labels")
+    if hidden_states.shape[1] != labels.shape[1]:
+        raise ValueError("Sequence length mismatch between hidden_states and labels")
+    if chunk_size <= 0:
+        raise ValueError("chunk_size must be positive")
+
+    # Causal shift: position t predicts token t+1.
+    shift_hidden = hidden_states[:, :-1, :]
+    shift_labels = labels[:, 1:]
+
+    batch_size, seq_len_minus_one, hidden_size = shift_hidden.shape
+    del hidden_size
+
+    total_loss = None
+    total_tokens = 0
+
+    for start in range(0, seq_len_minus_one, chunk_size):
+        end = min(start + chunk_size, seq_len_minus_one)
+
+        hidden_chunk = shift_hidden[:, start:end, :]
+        label_chunk = shift_labels[:, start:end]
+
+        logits_chunk = lm_head(hidden_chunk)
+
+        # Sum here so the final loss is the exact global mean over tokens,
+        # rather than an unweighted mean of chunk means.
+        chunk_loss = F.cross_entropy(
+            logits_chunk.reshape(-1, logits_chunk.shape[-1]),
+            label_chunk.reshape(-1),
+            ignore_index=ignore_index,
+            reduction="sum",
         )
 
-    # Shift so that tokens < n predict n
-    shift_logits = logits[..., :-1, :].contiguous()
-    shift_labels = labels[..., 1:].contiguous()
+        valid_tokens = int((label_chunk != ignore_index).sum().item())
 
-    # Flatten for cross entropy
-    vocab_size = shift_logits.shape[-1]
-    loss = F.cross_entropy(
-        shift_logits.view(-1, vocab_size),
-        shift_labels.view(-1),
-        ignore_index=ignore_index,
-    )
+        if valid_tokens:
+            total_loss = (
+                chunk_loss if total_loss is None
+                else total_loss + chunk_loss
+            )
+            total_tokens += valid_tokens
 
-    return loss
+    if total_loss is None or total_tokens == 0:
+        # Preserve autograd connectivity and return a finite scalar.
+        return (hidden_states.sum() * 0.0)
+
+    return total_loss / total_tokens

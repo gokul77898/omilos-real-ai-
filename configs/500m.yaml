@@ -6,7 +6,7 @@
 project:
   name: "indian-legal-reasoning-500m"
   seed: 42
-  output_dir: "runs/500m"
+  output_dir: "checkpoints/continued_128k"
   checkpoint_dir: "checkpoints/500m"
   log_dir: "logs/500m"
 
@@ -41,7 +41,7 @@ model:
   tie_word_embeddings: true
 
 training:
-  batch_size: 4
+  batch_size: 1
   gradient_accumulation_steps: 8
   learning_rate: 0.0003
   min_learning_rate: 0.00003
@@ -49,8 +49,8 @@ training:
   beta1: 0.9
   beta2: 0.95
   eps: 1.0e-8
-  warmup_steps: 1000
-  max_steps: 50000
+  warmup_steps: 300
+  max_steps: 10000
   max_grad_norm: 1.0
   mixed_precision: "auto"
   gradient_checkpointing: true
@@ -63,5 +63,5 @@ logging:
   save_every_steps: 1000
 
 checkpoint:
-  output_dir: "checkpoints/500m"
+  output_dir: "checkpoints/continued_128k"
   keep_last_n: 3

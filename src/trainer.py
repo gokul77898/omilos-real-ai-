@@ -174,7 +174,12 @@ class Trainer:
         # Forward pass with optional AMP
         if self.use_amp:
             with torch.autocast(device_type=self.device.type, dtype=self.amp_dtype):
-                output = self.model(input_ids=input_ids, labels=labels, attention_mask=attention_mask)
+                output = self.model(
+                    input_ids=input_ids,
+                    labels=labels,
+                    attention_mask=attention_mask,
+                    return_logits=False,
+                )
                 loss = output.loss
         else:
             output = self.model(input_ids=input_ids, labels=labels, attention_mask=attention_mask)
@@ -233,6 +238,7 @@ class Trainer:
                 input_ids=batch["input_ids"],
                 labels=batch.get("labels", batch["input_ids"]),
                 attention_mask=batch.get("attention_mask"),
+                return_logits=False,
             )
             total_loss += output.loss.item()
             total_batches += 1
