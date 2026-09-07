@@ -15,6 +15,7 @@ from src.config import AppConfig
 from src.logging_utils import setup_logger
 from src.model import LegalCausalLM
 from src.scheduler import get_cosine_schedule_with_warmup
+from src.hub import upload_verified_checkpoint
 
 
 class Trainer:
@@ -294,7 +295,21 @@ class Trainer:
                         tokens_per_sec = self.total_tokens_processed / max(0.001, elapsed)
                         current_lr = self.optimizer.param_groups[0]["lr"]
 
+                        # Report progress against one complete pass over the
+                        # current training dataset.
+                        tokens_per_epoch = (
+                            len(self.train_dataloader.dataset)
+                            * self.config.model.max_seq_len
+                        )
+
+                        corpus_epoch = (
+                            self.total_tokens_processed / tokens_per_epoch
+                            if tokens_per_epoch > 0
+                            else 0.0
+                        )
+
                         self.logger.info(
+                            f"Epoch {corpus_epoch:.3f}/1.000 | "
                             f"Step {self.global_step:5d}/{target_steps} | "
                             f"Loss: {avg_loss:.4f} | "
                             f"LR: {current_lr:.2e} | "
@@ -329,6 +344,38 @@ class Trainer:
 
                 if self.global_step >= target_steps:
                     break
+
+        # Always save the final checkpoint, even when target_steps is not
+        # divisible by save_every_steps.
+        if self.global_step == target_steps:
+            final_ckpt = save_checkpoint(
+                save_dir=self.config.checkpoint.output_dir,
+                model=self.model,
+                optimizer=self.optimizer,
+                scheduler=self.scheduler,
+                scaler=self.scaler,
+                step=self.global_step,
+                epoch=self.epoch,
+                config=self.config,
+                keep_last_n=self.config.checkpoint.keep_last_n,
+            )
+            self.logger.info(f"Saved final checkpoint to {final_ckpt}")
+
+            upload_result = upload_verified_checkpoint(
+                final_ckpt,
+                repo_id="OmilosAISolutions/omilos-legal-ai-10k",
+            )
+
+            if upload_result.get("uploaded"):
+                self.logger.info(
+                    f"Uploaded final checkpoint to HF: "
+                    f"{upload_result.get('checkpoint')}"
+                )
+            else:
+                self.logger.warning(
+                    f"HF final checkpoint upload failed; local checkpoint retained: "
+                    f"{upload_result.get('reason')}"
+                )
 
         total_time = time.time() - start_time
         self.logger.info(f"Training completed in {total_time:.2f}s ({self.global_step} steps)")
