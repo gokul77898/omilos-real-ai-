@@ -109,6 +109,7 @@ class CheckpointConfig:
     """Model checkpoint persistence settings."""
     output_dir: str = "checkpoints"
     keep_last_n: int = 3
+    hf_repo_id: str = "OmilosAISolutions/omilos-legal-ai-sft-140k"
 
 
 @dataclass
@@ -296,6 +297,12 @@ def load_config(config_path: str | Path = "configs/base.yaml") -> AppConfig:
     checkpoint_cfg = CheckpointConfig(
         output_dir=str(ckpt_data.get("output_dir", "checkpoints")),
         keep_last_n=int(ckpt_data.get("keep_last_n", 3)),
+        hf_repo_id=str(
+            ckpt_data.get(
+                "hf_repo_id",
+                "OmilosAISolutions/omilos-legal-ai-10k",
+            )
+        ),
     )
 
     return AppConfig(

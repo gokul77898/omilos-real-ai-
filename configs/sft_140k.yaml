@@ -1,0 +1,67 @@
+# ==============================================================================
+# Indian Legal Reasoning Model (Omilos Own AI) - 500M Target Architecture
+# Total Trainable Parameters: ~481.6M (Tied Embeddings)
+# ==============================================================================
+
+project:
+  name: "indian-legal-reasoning-500m"
+  seed: 42
+  output_dir: "checkpoints/sft_140k"
+  checkpoint_dir: "checkpoints/500m"
+  log_dir: "logs/500m"
+
+hardware:
+  device: "auto"
+  mixed_precision: "auto"
+
+tokenizer:
+  vocab_size: 32000
+  model_type: "bpe"
+  min_frequency: 2
+  special_tokens:
+    pad: "<pad>"
+    unk: "<unk>"
+    bos: "<s>"
+    eos: "</s>"
+
+model:
+  vocab_size: 32000
+  hidden_size: 1152
+  num_layers: 24
+  num_attention_heads: 18
+  num_kv_heads: 6
+  intermediate_size: 4352
+  max_seq_len: 8192
+  rope_theta: 10000.0
+  rope_scaling_type: "linear"
+  rope_scaling_factor: 64.0
+  attention_window: 8192
+  attention_chunk_size: 1024
+  rms_norm_eps: 1.0e-6
+  tie_word_embeddings: true
+
+training:
+  batch_size: 1
+  gradient_accumulation_steps: 8
+  learning_rate: 0.00001
+  min_learning_rate: 0.000001
+  weight_decay: 0.1
+  beta1: 0.9
+  beta2: 0.95
+  eps: 1.0e-8
+  warmup_steps: 500
+  max_steps: 20000
+  max_grad_norm: 1.0
+  mixed_precision: "auto"
+  gradient_checkpointing: true
+  eval_max_batches: 25
+
+logging:
+  level: "INFO"
+  log_every_steps: 10
+  eval_every_steps: 2000
+  save_every_steps: 5000
+checkpoint:
+  output_dir: "checkpoints/sft_140k"
+  keep_last_n: 3
+  hf_repo_id: "OmilosAISolutions/omilos-legal-ai-40k-sft"

@@ -363,7 +363,7 @@ class Trainer:
 
             upload_result = upload_verified_checkpoint(
                 final_ckpt,
-                repo_id="OmilosAISolutions/omilos-legal-ai-10k",
+                repo_id=self.config.checkpoint.hf_repo_id,
             )
 
             if upload_result.get("uploaded"):
